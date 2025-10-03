@@ -65,6 +65,13 @@ export default function CompetitionDetail() {
     }
   }, [id, activeTab]);
 
+  // Fetch teams for public view (shows team names only)
+  useEffect(() => {
+    if (id && !isOwner && competition?.status === 'PUBLISHED') {
+      fetchTeams(id);
+    }
+  }, [id, isOwner, competition?.status]);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -273,22 +280,56 @@ export default function CompetitionDetail() {
           </div>
         ) : (
           /* Public/Coach View */
-          <div className="bg-white shadow rounded-lg">
-            <div className="p-6 space-y-6">
-              <OverviewTab competition={competition} isOwner={false} />
-            </div>
+          <div className="space-y-6">
+            <div className="bg-white shadow rounded-lg">
+              <div className="p-6 space-y-6">
+                <OverviewTab competition={competition} isOwner={false} />
 
-            {/* Register Button (Public/Coach View) */}
-            {competition.status === 'PUBLISHED' && user?.role === 'COACH' && (
-              <div className="bg-gray-50 px-6 py-4">
-                <button
-                  onClick={() => window.location.href = `/competitions/${competition.id}/register`}
-                  className="w-full sm:w-auto bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium"
-                >
-                  Register Team
-                </button>
+                {/* Registered Teams - Public View */}
+                {competition.status === 'PUBLISHED' && teams.length > 0 && (
+                  <div className="pt-6 border-t border-gray-200">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Registered Teams ({teams.length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {teams.map((team) => (
+                        <div
+                          key={team.id}
+                          className="flex items-center space-x-2 text-gray-700 bg-gray-50 px-3 py-2 rounded-md"
+                        >
+                          <svg
+                            className="h-5 w-5 text-indigo-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                            />
+                          </svg>
+                          <span className="font-medium">{team.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Register Button (Public/Coach View) */}
+              {competition.status === 'PUBLISHED' && user?.role === 'COACH' && (
+                <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                  <button
+                    onClick={() => window.location.href = `/competitions/${competition.id}/register`}
+                    className="w-full sm:w-auto bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium"
+                  >
+                    Register Team
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
