@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(taskkill:*)",
+      "Bash(STRIPE_WEBHOOK_SECRET=whsec_b16d8d54a93cf2225adb65a646a0da82a5a2d7a735a0555753e571794f614615 ./mvnw spring-boot:run)",
+      "Bash(npm install:*)",
+      "Bash(netstat:*)",
+      "Bash(npm run dev:*)",
+      "Bash(psql:*)",
+      "Bash(winget install:*)",
+      "Bash(stripe login:*)",
+      "Bash(scoop install:*)",
+      "Bash(curl -L https://github.com/stripe/stripe-cli/releases/latest/download/stripe_windows_x86_64.zip -o stripe.zip)",
+      "Bash(unzip:*)",
+      "Bash(cat:*)",
+      "Bash(rm:*)",
+      "Bash(curl -L https://github.com/stripe/stripe-cli/releases/download/v1.22.3/stripe_1.22.3_windows_x86_64.zip -o stripe.zip)",
+      "Bash(curl:*)",
+      "Bash(chmod:*)",
+      "Bash(./stripe.exe --version)",
+      "Bash(stripe:*)",
+      "Bash(findstr:*)",
+      "Bash(./mvnw:*)",
+      "Bash(tasklist)",
+      "Bash(./stripe.exe listen:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

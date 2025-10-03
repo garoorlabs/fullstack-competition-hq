@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: LeagueHQ
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/leaguehq
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    schemas: public
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+# JWT Configuration
+jwt:
+  secret: dev-secret-key-change-this-in-production-must-be-at-least-256-bits-long
+  expiration: 86400000 # 24 hours in milliseconds
+
+# Stripe Configuration (use test keys)
+# For local development with Stripe CLI:
+# 1. Run: stripe login
+# 2. Run: stripe listen --forward-to localhost:8080/api/stripe/webhooks
+# 3. Copy the webhook signing secret (whsec_...) from the CLI output
+# 4. Set it as an environment variable: STRIPE_WEBHOOK_SECRET=whsec_...
+stripe:
+  api-key: ${STRIPE_SECRET_KEY:sk_test_your_test_key_here}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_your_stripe_cli_webhook_secret_here}
+  connect:
+    client-id: ${STRIPE_CONNECT_CLIENT_ID:ca_your_connect_client_id_here}
+
+# AWS S3 / Cloudflare R2 Configuration
+aws:
+  s3:
+    region: us-east-1
+    bucket-name: leaguehq-photos-dev
+    access-key-id: ${AWS_ACCESS_KEY_ID:}
+    secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+    endpoint: ${AWS_S3_ENDPOINT:}
+
+# CORS Configuration
+cors:
+  allowed-origins: http://localhost:5173,http://localhost:3000
+
+# Logging
+logging:
+  level:
+    com.leaguehq: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Server Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
