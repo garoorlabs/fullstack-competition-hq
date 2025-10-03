@@ -2,19 +2,26 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { competitionApi, stripeApi } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
-import type { Competition } from '../types';
+import type { Competition, Team } from '../types';
 import Header from '../components/layout/Header';
 import StatusBadge from '../components/common/StatusBadge';
+import SubscriptionStatusBadge from '../components/common/SubscriptionStatusBadge';
 import Spinner from '../components/common/Spinner';
+import Tabs from '../components/common/Tabs';
+import OverviewTab from '../components/competition/OverviewTab';
+import TeamsTab from '../components/competition/TeamsTab';
 
 export default function CompetitionDetail() {
   const { id } = useParams<{ id: string }>();
   const { user, refreshUser } = useAuth();
   const [competition, setCompetition] = useState<Competition | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+  const [teamsLoading, setTeamsLoading] = useState(false);
   const [error, setError] = useState('');
   const [publishLoading, setPublishLoading] = useState(false);
   const [connectLoading, setConnectLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (id) {
@@ -39,6 +46,24 @@ export default function CompetitionDetail() {
       setLoading(false);
     }
   };
+
+  const fetchTeams = async (competitionId: string) => {
+    setTeamsLoading(true);
+    try {
+      const data = await competitionApi.getTeams(competitionId);
+      setTeams(data);
+    } catch (err: any) {
+      console.error('Failed to load teams:', err);
+    } finally {
+      setTeamsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id && activeTab === 'teams') {
+      fetchTeams(id);
+    }
+  }, [id, activeTab]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -198,53 +223,40 @@ export default function CompetitionDetail() {
           </div>
         )}
 
-        {/* Content Card */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="p-6 space-y-6">
-            {/* Description */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Description</h3>
-              <p className="text-gray-600">{competition.description}</p>
+        {/* Content Card with Tabs (Owner View) */}
+        {isOwner ? (
+          <div className="bg-white shadow rounded-lg">
+            <div className="p-6">
+              <Tabs
+                tabs={[
+                  {
+                    id: 'overview',
+                    label: 'Overview',
+                    content: <OverviewTab competition={competition} isOwner={isOwner} />,
+                  },
+                  {
+                    id: 'teams',
+                    label: 'Teams',
+                    content: <TeamsTab teams={teams} loading={teamsLoading} />,
+                  },
+                  {
+                    id: 'matches',
+                    label: 'Matches',
+                    content: <div className="py-12 text-center text-gray-500">Matches feature coming in Week 7</div>,
+                  },
+                  {
+                    id: 'standings',
+                    label: 'Standings',
+                    content: <div className="py-12 text-center text-gray-500">Standings feature coming in Week 7</div>,
+                  },
+                ]}
+                activeTab={activeTab}
+                onChange={setActiveTab}
+              />
             </div>
 
-            {/* Venue */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Venue</h3>
-              {competition.venues.map((venue) => (
-                <div key={venue.id} className="text-gray-600">
-                  <p className="font-medium">{venue.name}</p>
-                  <p>{venue.address}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Share Link (Owner Only) */}
-            {isOwner && competition.shareToken && (
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Share Link</h3>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={`${window.location.origin}/join/${competition.shareToken}`}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-600"
-                  />
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/join/${competition.shareToken}`);
-                    }}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm font-medium"
-                  >
-                    Copy
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          {isOwner && (
-            <div className="bg-gray-50 px-6 py-4 flex space-x-3">
+            {/* Action Buttons */}
+            <div className="bg-gray-50 px-6 py-4 flex space-x-3 border-t border-gray-200">
               <button className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 Edit Competition
               </button>
@@ -258,20 +270,27 @@ export default function CompetitionDetail() {
                 </button>
               )}
             </div>
-          )}
-
-          {/* Register Button (Public/Coach View) */}
-          {!isOwner && competition.status === 'PUBLISHED' && user?.role === 'COACH' && (
-            <div className="bg-gray-50 px-6 py-4">
-              <button
-                onClick={() => window.location.href = `/competitions/${competition.id}/register`}
-                className="w-full sm:w-auto bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium"
-              >
-                Register Team
-              </button>
+          </div>
+        ) : (
+          /* Public/Coach View */
+          <div className="bg-white shadow rounded-lg">
+            <div className="p-6 space-y-6">
+              <OverviewTab competition={competition} isOwner={false} />
             </div>
-          )}
-        </div>
+
+            {/* Register Button (Public/Coach View) */}
+            {competition.status === 'PUBLISHED' && user?.role === 'COACH' && (
+              <div className="bg-gray-50 px-6 py-4">
+                <button
+                  onClick={() => window.location.href = `/competitions/${competition.id}/register`}
+                  className="w-full sm:w-auto bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium"
+                >
+                  Register Team
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

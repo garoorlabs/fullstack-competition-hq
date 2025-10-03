@@ -10,6 +10,7 @@ import StripeRefresh from './pages/StripeRefresh';
 import RegisterTeam from './pages/RegisterTeam';
 import TeamRegistrationSuccess from './pages/TeamRegistrationSuccess';
 import MyTeams from './pages/MyTeams';
+import UpdatePayment from './pages/UpdatePayment';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
@@ -66,6 +67,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TeamRegistrationSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teams/:id/payment"
+            element={
+              <ProtectedRoute>
+                <UpdatePayment />
               </ProtectedRoute>
             }
           />

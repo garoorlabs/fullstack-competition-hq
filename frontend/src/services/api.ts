@@ -82,6 +82,11 @@ export const competitionApi = {
     const response = await api.post<Competition>(`/competitions/${id}/publish`);
     return response.data;
   },
+
+  getTeams: async (competitionId: string): Promise<Team[]> => {
+    const response = await api.get<Team[]>(`/competitions/${competitionId}/teams`);
+    return response.data;
+  },
 };
 
 // Stripe API
@@ -104,6 +109,11 @@ export const teamApi = {
 
   getMyTeams: async (): Promise<Team[]> => {
     const response = await api.get<Team[]>('/teams/my');
+    return response.data;
+  },
+
+  updatePaymentMethod: async (teamId: string): Promise<{ sessionUrl: string; sessionId: string }> => {
+    const response = await api.post(`/teams/${teamId}/update-payment`);
     return response.data;
   },
 };

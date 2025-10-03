@@ -113,6 +113,7 @@ export interface Team {
   competitionName: string;
   coachId: string;
   coachName: string;
+  coachEmail: string;
   name: string;
   entryFeePaid: boolean;
   entryFeePaidAt: string | null;
