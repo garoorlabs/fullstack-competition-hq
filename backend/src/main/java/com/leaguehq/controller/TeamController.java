@@ -67,4 +67,16 @@ public class TeamController {
 
         return ResponseEntity.ok(team);
     }
+
+    @PostMapping("/{id}/update-payment")
+    public ResponseEntity<CheckoutSessionResponse> updatePaymentMethod(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable UUID id) {
+
+        log.info("Update payment method request: teamId={}, userId={}", id, userPrincipal.getId());
+
+        CheckoutSessionResponse response = teamService.createCustomerPortalSession(id, userPrincipal.getId());
+
+        return ResponseEntity.ok(response);
+    }
 }

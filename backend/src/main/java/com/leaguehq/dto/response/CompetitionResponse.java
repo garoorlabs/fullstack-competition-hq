@@ -37,7 +37,7 @@ public class CompetitionResponse {
     private Instant updatedAt;
     private Instant publishedAt;
 
-    public static CompetitionResponse fromEntity(Competition competition, List<VenueResponse> venues) {
+    public static CompetitionResponse fromEntity(Competition competition, List<VenueResponse> venues, Integer currentTeamCount) {
         return CompetitionResponse.builder()
                 .id(competition.getId())
                 .ownerId(competition.getOwner().getId())
@@ -47,7 +47,7 @@ public class CompetitionResponse {
                 .format(competition.getFormat())
                 .teamSize(competition.getTeamSize())
                 .entryFee(competition.getEntryFee())
-                .currentTeamCount(0) // TODO: Calculate from teams table
+                .currentTeamCount(currentTeamCount)
                 .platformFeePercentage(competition.getPlatformFeePercentage())
                 .policy(competition.getPolicy())
                 .maxTeams(competition.getMaxTeams())

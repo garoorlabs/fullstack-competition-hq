@@ -80,4 +80,15 @@ public class CompetitionController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{id}/teams")
+    public ResponseEntity<List<com.leaguehq.dto.response.TeamResponse>> getCompetitionTeams(
+            @PathVariable UUID id) {
+
+        log.debug("Get teams for competition: {}", id);
+
+        List<com.leaguehq.dto.response.TeamResponse> teams = competitionService.getTeamsByCompetitionId(id);
+
+        return ResponseEntity.ok(teams);
+    }
 }

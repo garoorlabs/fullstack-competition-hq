@@ -46,6 +46,9 @@ public class TeamService {
     @Value("${stripe.price.monthly-dues}")
     private String monthlyDuesPriceId;
 
+    @Value("${cors.allowed-origins:http://localhost:5173}")
+    private String returnUrl;
+
     @Transactional
     public Team registerTeam(UUID coachId, RegisterTeamRequest request) {
         log.info("Registering team for coach: {}, competition: {}", coachId, request.getCompetitionId());
@@ -250,5 +253,67 @@ public class TeamService {
         }
 
         return TeamResponse.fromEntity(team);
+    }
+
+    public List<TeamResponse> getTeamsByCompetitionId(UUID competitionId) {
+        log.info("Getting teams for competition: {}", competitionId);
+
+        // Verify competition exists
+        Competition competition = competitionRepository.findById(competitionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Competition not found"));
+
+        // Get all teams for this competition
+        List<Team> teams = teamRepository.findByCompetitionId(competitionId);
+
+        // Convert to responses and sort by registration date (newest first)
+        return teams.stream()
+                .map(TeamResponse::fromEntity)
+                .sorted((t1, t2) -> {
+                    if (t1.getRegisteredAt() == null && t2.getRegisteredAt() == null) return 0;
+                    if (t1.getRegisteredAt() == null) return 1;
+                    if (t2.getRegisteredAt() == null) return -1;
+                    return t2.getRegisteredAt().compareTo(t1.getRegisteredAt());
+                })
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public CheckoutSessionResponse createCustomerPortalSession(UUID teamId, UUID coachId) {
+        log.info("Creating customer portal session: teamId={}, coachId={}", teamId, coachId);
+
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new ResourceNotFoundException("Team not found"));
+
+        // Verify coach owns this team
+        if (!team.getCoach().getId().equals(coachId)) {
+            throw new BadRequestException("You don't have permission to update payment for this team");
+        }
+
+        // Verify team has a Stripe customer ID
+        if (team.getStripeCustomerId() == null || team.getStripeCustomerId().isEmpty()) {
+            throw new BadRequestException("No payment method found for this team");
+        }
+
+        try {
+            // Create Stripe Customer Portal session
+            com.stripe.param.billingportal.SessionCreateParams params =
+                    com.stripe.param.billingportal.SessionCreateParams.builder()
+                            .setCustomer(team.getStripeCustomerId())
+                            .setReturnUrl(frontendUrl + "/teams")
+                            .build();
+
+            com.stripe.model.billingportal.Session session =
+                    com.stripe.model.billingportal.Session.create(params);
+
+            log.info("Customer portal session created: sessionId={}, teamId={}", session.getId(), teamId);
+
+            return CheckoutSessionResponse.builder()
+                    .sessionUrl(session.getUrl())
+                    .sessionId(session.getId())
+                    .build();
+
+        } catch (com.stripe.exception.StripeException e) {
+            log.error("Failed to create customer portal session: teamId={}, error={}", teamId, e.getMessage(), e);
+            throw new BadRequestException("Failed to create payment portal session: " + e.getMessage());
+        }
     }
 }

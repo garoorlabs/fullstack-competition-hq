@@ -2,6 +2,7 @@ package com.leaguehq.service;
 
 import com.leaguehq.dto.request.CreateCompetitionRequest;
 import com.leaguehq.dto.response.CompetitionResponse;
+import com.leaguehq.dto.response.TeamResponse;
 import com.leaguehq.dto.response.VenueResponse;
 import com.leaguehq.exception.BadRequestException;
 import com.leaguehq.exception.ResourceNotFoundException;
@@ -29,6 +30,8 @@ public class CompetitionService {
     private final CompetitionRepository competitionRepository;
     private final VenueRepository venueRepository;
     private final UserRepository userRepository;
+    private final com.leaguehq.repository.TeamRepository teamRepository;
+    private final TeamService teamService;
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final String SHARE_TOKEN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -90,7 +93,8 @@ public class CompetitionService {
         log.info("Venue created: venueId={}, competitionId={}", venue.getId(), competition.getId());
 
         List<VenueResponse> venues = List.of(VenueResponse.fromEntity(venue));
-        return CompetitionResponse.fromEntity(competition, venues);
+        int teamCount = (int) teamRepository.countRegisteredTeamsByCompetitionId(competition.getId());
+        return CompetitionResponse.fromEntity(competition, venues, teamCount);
     }
 
     @Transactional(readOnly = true)
@@ -108,7 +112,8 @@ public class CompetitionService {
                     List<VenueResponse> venueResponses = venues.stream()
                             .map(VenueResponse::fromEntity)
                             .collect(Collectors.toList());
-                    return CompetitionResponse.fromEntity(competition, venueResponses);
+                    int teamCount = (int) teamRepository.countRegisteredTeamsByCompetitionId(competition.getId());
+                    return CompetitionResponse.fromEntity(competition, venueResponses, teamCount);
                 })
                 .collect(Collectors.toList());
     }
@@ -125,7 +130,8 @@ public class CompetitionService {
                 .map(VenueResponse::fromEntity)
                 .collect(Collectors.toList());
 
-        return CompetitionResponse.fromEntity(competition, venueResponses);
+        int teamCount = (int) teamRepository.countRegisteredTeamsByCompetitionId(competition.getId());
+        return CompetitionResponse.fromEntity(competition, venueResponses, teamCount);
     }
 
     private String generateShareToken() {
@@ -149,7 +155,8 @@ public class CompetitionService {
                     List<VenueResponse> venueResponses = venues.stream()
                             .map(VenueResponse::fromEntity)
                             .collect(Collectors.toList());
-                    return CompetitionResponse.fromEntity(competition, venueResponses);
+                    int teamCount = (int) teamRepository.countRegisteredTeamsByCompetitionId(competition.getId());
+                    return CompetitionResponse.fromEntity(competition, venueResponses, teamCount);
                 })
                 .collect(Collectors.toList());
     }
@@ -184,7 +191,8 @@ public class CompetitionService {
                 .map(VenueResponse::fromEntity)
                 .collect(Collectors.toList());
 
-        return CompetitionResponse.fromEntity(competition, venueResponses);
+        int teamCount = (int) teamRepository.countRegisteredTeamsByCompetitionId(competition.getId());
+        return CompetitionResponse.fromEntity(competition, venueResponses, teamCount);
     }
 
     private Map<String, Object> getDefaultPolicy() {
@@ -216,5 +224,11 @@ public class CompetitionService {
         policy.put("refunds", refunds);
 
         return policy;
+    }
+
+    @Transactional(readOnly = true)
+    public List<TeamResponse> getTeamsByCompetitionId(UUID competitionId) {
+        log.debug("Getting teams for competition: {}", competitionId);
+        return teamService.getTeamsByCompetitionId(competitionId);
     }
 }

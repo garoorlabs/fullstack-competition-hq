@@ -16,6 +16,7 @@ public class TeamResponse {
     private String competitionName;
     private UUID coachId;
     private String coachName;
+    private String coachEmail;
     private String name;
 
     // Payment & Subscription
@@ -44,6 +45,7 @@ public class TeamResponse {
                 .competitionName(team.getCompetition().getName())
                 .coachId(team.getCoach().getId())
                 .coachName(team.getCoach().getFullName())
+                .coachEmail(team.getCoach().getEmail())
                 .name(team.getName())
                 .entryFeePaid(team.getEntryFeePaid())
                 .entryFeePaidAt(team.getEntryFeePaidAt())
