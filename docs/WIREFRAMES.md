@@ -265,6 +265,103 @@ Page layouts and user flows for MVP. Aligns with build plan phases and UI design
 
 ---
 
+### 5b. Competition Detail - Teams Tab (Owner View) (`/competitions/:id` - Teams tab)
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Header: LeagueHQ | Competitions | Profile ▼           │
+├────────────────────────────────────────────────────────┤
+│                                                        │
+│  Summer League 2025                        [ACTIVE]   │
+│  ───────────────────                                   │
+│                                                        │
+│  11v11 League • Mar 15 - Jun 15, 2025                 │
+│  Entry Fee: $150 • 8/20 teams registered              │
+│                                                        │
+│  [Tabs: Overview | TEAMS | Matches | Standings]       │
+│  ═══════════════════════════════════════════           │
+│                                                        │
+│  Registered Teams (8)                                 │
+│  ────────────────────                                  │
+│                                                        │
+│  ┌─────────────────────────────────────────────────┐  │
+│  │ Team Name      Coach           Sub Status  Size │  │
+│  ├─────────────────────────────────────────────────┤  │
+│  │ Thunder FC     John Doe         [ACTIVE]    15  │  │
+│  │                john@email.com   Mar 1, 2025     │  │
+│  │                                 [View Roster]   │  │
+│  ├─────────────────────────────────────────────────┤  │
+│  │ Lightning Utd  Sarah Smith      [ACTIVE]    12  │  │
+│  │                sarah@email.com  Mar 3, 2025     │  │
+│  │                                 [View Roster]   │  │
+│  ├─────────────────────────────────────────────────┤  │
+│  │ Storm Strikers Mike Jones       [PAST_DUE]  8   │  │
+│  │                mike@email.com   Mar 5, 2025     │  │
+│  │                                 [View Roster]   │  │
+│  ├─────────────────────────────────────────────────┤  │
+│  │ ... (5 more teams)                              │  │
+│  └─────────────────────────────────────────────────┘  │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+```
+
+**Key Elements:**
+- Teams tab is active (underlined/highlighted)
+- Table showing all registered teams
+- Each row shows:
+  - Team name
+  - Coach name and email
+  - Subscription status badge (ACTIVE, PAST_DUE, CANCELLED)
+  - Registration date
+  - Roster size (current player count)
+  - "View Roster" button to see players
+- Visual indication of payment issues (PAST_DUE in yellow/red)
+- Sortable by registration date (newest first)
+
+---
+
+### 5c. Update Payment Page (Coach View) (`/teams/:id/payment`)
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Header: LeagueHQ | My Teams | Profile ▼               │
+├────────────────────────────────────────────────────────┤
+│                                                        │
+│  Update Payment Method                                │
+│  ─────────────────────                                 │
+│                                                        │
+│  ⚠️  Your subscription payment failed                  │
+│                                                        │
+│  Team: Thunder FC                                     │
+│  Competition: Summer League 2025                      │
+│  Status: PAST_DUE                                     │
+│                                                        │
+│  To continue participating, please update your        │
+│  payment method.                                      │
+│                                                        │
+│  Monthly Subscription: $20.00/month                   │
+│  Next Payment Attempt: Mar 15, 2025                   │
+│                                                        │
+│  [Update Payment Method]                              │
+│                                                        │
+│  This will redirect you to a secure payment portal   │
+│  where you can update your card information.          │
+│                                                        │
+│  [Cancel]                                             │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+```
+
+**Key Elements:**
+- Warning alert for payment failure
+- Team and competition context
+- Clear explanation of issue
+- Monthly subscription amount shown
+- "Update Payment Method" button redirects to Stripe Customer Portal
+- Cancel button returns to My Teams
+
+---
+
 ### 6. Competition Detail (Public/Coach View) (`/competitions/:id`)
 
 ```

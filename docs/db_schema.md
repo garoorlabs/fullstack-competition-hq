@@ -381,11 +381,16 @@ FOR EACH ROW EXECUTE FUNCTION update_team_roster_size();
 -- NOTES
 -- ============================================
 
--- This schema supports the 6-7 week MVP:
+-- This schema supports the 8-week MVP (updated timeline):
 -- Week 1-3: Users, competitions, venues
--- Week 4-5: Teams, payments, subscriptions  
+-- Week 4-5: Teams, payments, subscriptions
+-- Week 5.5: Owner dashboard (teams view) - uses existing schema
+--   - Query teams by competition_id for owner dashboard
+--   - Uses roster_size, subscription_status, registered_at fields
+--   - Joins with users table for coach info
 -- Week 6: Players with photos
 -- Week 7: Matches, results, standings
+-- Week 8: Production readiness & polish
 
 -- Deferred to V2__enhancements.sql (post-launch):
 -- - Audit tables (payments_audit, roster_audit, results_audit, domain_events)
